@@ -1,0 +1,282 @@
+# 🧠 Chat API
+
+A simple REST API for a chat application with OpenAI (via LangChain) integration, user authentication (JWT), rate limiting, and a token-based usage system.
+
+---
+
+## 📚 Table of Contents
+
+- [Features](#features)
+- [Setup Instructions](#setup-instructions)
+- [Environment Variables](#environment-variables)
+- [API Documentation](#api-documentation)
+  - [Authentication Endpoints](#1-authentication-endpoints)
+  - [Chat Endpoints](#2-chat-endpoints)
+- [Testing with cURL](#testing-with-curl)
+
+---
+
+## ✅ Features
+
+- **User Authentication**: Register/login using JWT; passwords are hashed with bcrypt.
+- **Chat with AI**: Send messages and get responses from OpenAI.
+- **LangChain Integration**:
+  - Prompt Templates for structured prompts
+  - Memory for retaining conversation context
+  - Runnable chains for AI interaction
+- **Token Credit System**: Each user starts with 100,000 tokens. Tokens are deducted based on LLM usage.
+- **Rate Limiting**: 20 chat requests per hour per user.
+- **MongoDB Support**: All users and conversations are persisted.
+- **Basic Error Handling**: Server and client errors are handled gracefully.
+
+---
+
+## ⚙️ Setup Instructions
+
+### 📁 Folder Structure
+
+```
+chat-api/
+├── config/
+│   └── db.js
+├── controllers/
+│   ├── authController.js
+│   └── chatController.js
+├── middleware/
+│   ├── auth.js
+│   └── rateLimit.js
+├── models/
+│   ├── Conversation.js
+│   └── User.js
+├── routes/
+│   ├── auth.js
+│   └── chat.js
+├── tests/
+│   └── auth.test.js
+├── .env
+├── jest.config.js
+├── package.json
+└── server.js
+```
+
+### 🧰 Prerequisites
+
+- Node.js and npm: [Download](https://nodejs.org)
+- MongoDB Server: [Install Guide](https://www.mongodb.com/try/download/community)
+
+Ensure MongoDB is running (`mongod`) before continuing.
+
+### 🔧 Installation Steps
+
+```bash
+cd path/to/your/chat-api
+npm install
+```
+
+### 🔐 Create `.env` File
+
+```
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/chatdb
+JWT_SECRET=your_super_secret_jwt_key_here
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+### 🚀 Start Server
+
+```bash
+npm run dev       # for development (with nodemon)
+npm start         # for production
+```
+
+You should see:
+
+- `Server running on port 5000`
+- `MongoDB Connected...`
+
+### 🧪 Run Unit Tests
+
+```bash
+npm test
+```
+
+---
+
+## 📘 API Documentation
+
+All endpoints return JSON.
+
+### 1. Authentication Endpoints
+
+#### 🔐 Register User
+
+- **Endpoint**: `POST /api/auth/register`
+- **Access**: Public
+- **Body**:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "strongpassword123"
+}
+```
+
+- **Success**:
+
+```json
+{
+  "token": "<JWT_TOKEN>"
+}
+```
+
+#### 🔐 Login User
+
+- **Endpoint**: `POST /api/auth/login`
+- **Access**: Public
+- **Body**:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "strongpassword123"
+}
+```
+
+- **Success**:
+
+```json
+{
+  "token": "<JWT_TOKEN>"
+}
+```
+
+---
+
+### 2. Chat Endpoints
+
+> **All endpoints below require **``** header**
+
+#### 🧠 Send Message
+
+- **Endpoint**: `POST /api/chat`
+- **Access**: Private (rate-limited)
+- **Body (new conversation)**:
+
+```json
+{
+  "message": "Tell me about AI"
+}
+```
+
+- **Body (existing conversation)**:
+
+```json
+{
+  "conversationId": "<ID>",
+  "message": "What are its applications?"
+}
+```
+
+- **Response**:
+
+```json
+{
+  "message": "AI is a branch of computer science...",
+  "conversationId": "<ID>",
+  "tokensUsed": 57,
+  "remainingTokens": 99943
+}
+```
+
+#### 📜 Get Chat History
+
+- **Endpoint**: `GET /api/chat/:conversationId`
+- **Response**:
+
+```json
+{
+  "conversation": {
+    "id": "<ID>",
+    "messages": [
+      { "role": "user", "content": "Tell me about AI" },
+      { "role": "assistant", "content": "AI is..." }
+    ]
+  }
+}
+```
+
+#### 🗂️ List Conversations
+
+- **Endpoint**: `GET /api/chat`
+- **Response**:
+
+```json
+{
+  "conversations": [
+    {
+      "id": "<ID>",
+      "lastMessage": "Tell me about AI",
+      "updatedAt": "2024-01-29T10:30:01Z"
+    }
+  ]
+}
+```
+
+---
+
+## 🧪 Testing with cURL
+
+### 1. Register User
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{ "email": "test@example.com", "password": "password123" }' \
+  http://localhost:5000/api/auth/register
+```
+
+### 2. Login User
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{ "email": "test@example.com", "password": "password123" }' \
+  http://localhost:5000/api/auth/login
+```
+
+### 3. Send Message (New)
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{ "message": "Tell me about the internet." }' \
+  http://localhost:5000/api/chat
+```
+
+### 4. Send Message (Existing)
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{ "conversationId": "YOUR_CONVERSATION_ID", "message": "Who were the key figures?" }' \
+  http://localhost:5000/api/chat
+```
+
+### 5. Get Chat History
+
+```bash
+curl -X GET \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  http://localhost:5000/api/chat/YOUR_CONVERSATION_ID
+```
+
+### 6. List Conversations
+
+```bash
+curl -X GET \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  http://localhost:5000/api/chat
+```
+

@@ -1,0 +1,26 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+
+# Environment variables
+.env
+
+# Testing
+/coverage
+/.jest
+
+# IDE-specific files (optional, depends on your preference)
+.idea/
+.vscode/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Build artifacts (if you later introduce a build step)
+/dist
+/build
