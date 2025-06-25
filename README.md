@@ -56,6 +56,7 @@ npm install
 ```
 
 ### 🔐 Create `.env` File
+*📝 If you're running this project locally, make sure MongoDB is installed and running on port 27017 (default). You can change `MONGO_URI` in the `.env` file if you're using a remote database or MongoDB Atlas.
 
 ```
 PORT=5000
