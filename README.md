@@ -245,42 +245,4 @@ curl -X GET   -H "Authorization: Bearer YOUR_JWT_TOKEN"   http://localhost:5000/
 curl -X GET   -H "Authorization: Bearer YOUR_JWT_TOKEN"   http://localhost:5000/api/chat
 ```
 
----
 
-## 🚀 Live Demo Deployment
-
-### 1. Deploy with Railway
-
-1. Sign up at [Railway.app](https://railway.app)
-2. Create Project → “Deploy from GitHub repo”
-3. Connect `https://github.com/godman32770/ChatAPI`
-4. Add Environment Variables: `MONGO_URI`, `JWT_SECRET`, `OPENAI_API_KEY`, `PORT=5000`
-5. Deploy and share the live URL
-
-### 2. Deploy with Heroku
-
-```bash
-heroku login
-heroku create chatapi-demo
-heroku config:set MONGO_URI=... JWT_SECRET=... OPENAI_API_KEY=...
-git push heroku main
-heroku open
-```
-
-### 3. Use ngrok for Local Tunnels
-
-```bash
-npm run dev
-ngrok http 5000
-```
-
-### 4. Deploy with Vercel (optional)
-
-This project is server-based and not optimized for Vercel, but you **can deploy**:
-
-```bash
-npm i -g vercel
-vercel login
-vercel
-vercel --prod
-```
